@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast";
 import AuthModal from "./components/authModal";
 import Home from "./pages/Home";
 import MenuDetail from "./pages/Detail";
-import Checkout from "./pages/Checkout";
+import Checkout from "./pages/CheckOut";
 import MyOrders from "./pages/MyOrders";
 import Register from "./pages/Register";
 import Login from "./pages/Login";

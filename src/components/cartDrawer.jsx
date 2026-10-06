@@ -1,6 +1,7 @@
 import { useCart } from "../context/cartContext";
 import useAuth from "../context/useAuth";
 import toast from "react-hot-toast";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   FaTimes,
@@ -42,7 +43,7 @@ const CartDrawer = ({ onClose }) => {
     navigate("/checkout");
   };
 
-  return (
+  return createPortal (
     <div
       className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex justify-end transition-opacity duration-300"
       onClick={onClose}
@@ -206,7 +207,9 @@ const CartDrawer = ({ onClose }) => {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
+    
   );
 };
 
