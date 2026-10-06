@@ -318,7 +318,7 @@ const AdminDashboard = () => {
     fetchMenuTerlaris();
 
     return () => clearInterval(interval); // bersihkan saat komponen unmount
-  }, []);
+  }, [fetchMenuTerlaris, fetchMenus, fetchPesanan, fetchSummary, fetchSummaryHarian]);
 
   return (
     <div className="flex min-h-screen bg-gray-50/80 font-sans">
