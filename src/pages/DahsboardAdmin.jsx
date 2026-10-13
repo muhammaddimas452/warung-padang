@@ -69,7 +69,7 @@ const AdminDashboard = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setSummaryHarian(res.data.reverse()); // reverse supaya dari hari lama ke baru
     } catch (err) {
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
         "http://localhost:8000/api/statistik/menu-terlaris",
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setMenuTerlaris(res.data);
     } catch (err) {
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Menu berhasil ditambahkan!");
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
             Authorization: `Bearer ${token}`,
             // "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       toast.success("Menu berhasil diupdate!");
       setEditModalOpen(false);
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
       },
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
   };
 
@@ -292,7 +292,7 @@ const AdminDashboard = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (res.data.success) {
@@ -308,17 +308,22 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchMenus(); // ambil menu
-    fetchKategori(); // ambil kategori
-    const interval = setInterval(() => {
-      fetchPesanan(); // fungsi untuk ambil data dari backend
-    }, 7000); // setiap 7 detik
+    // Panggil semua fungsi secara langsung saat halaman pertama dimuat
+    fetchMenus();
+    fetchKategori();
+    fetchPesanan(); // 👈 Tambahkan ini agar pesanan langsung muncul tanpa jeda
     fetchSummary();
     fetchSummaryHarian();
     fetchMenuTerlaris();
 
-    return () => clearInterval(interval); // bersihkan saat komponen unmount
-  }, [fetchMenuTerlaris, fetchMenus, fetchPesanan, fetchSummary, fetchSummaryHarian]);
+    // Jalankan interval khusus untuk update data pesanan secara real-time
+    const interval = setInterval(() => {
+      fetchPesanan();
+    }, 7000);
+
+    // Bersihkan interval saat komponen dilepas (unmount)
+    return () => clearInterval(interval);
+  }, []); // 👈 Kosongkan dependency array agar useEffect hanya berjalan 1 kali saat mount
 
   return (
     <div className="flex min-h-screen bg-gray-50/80 font-sans">
@@ -335,7 +340,9 @@ const AdminDashboard = () => {
                 <span>🍽️</span>
                 <span>Resto Admin</span>
               </h2>
-              <p className="text-[11px] text-gray-400 mt-0.5">Rumah Makan Padang Minang</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Rumah Makan Padang Minang
+              </p>
             </div>
             <button
               className="text-gray-400 hover:text-orange-600 text-lg md:hidden p-1.5 rounded-lg hover:bg-orange-50 transition"
@@ -346,7 +353,11 @@ const AdminDashboard = () => {
           </div>
           <nav className="space-y-1.5">
             {[
-              { label: "Statistik & Ringkasan", value: "analytics", icon: "📊" },
+              {
+                label: "Statistik & Ringkasan",
+                value: "analytics",
+                icon: "📊",
+              },
               { label: "Manajemen Menu", value: "menu", icon: "📋" },
               { label: "Daftar Pesanan", value: "orders", icon: "🧾" },
             ].map((item) => (
@@ -473,7 +484,13 @@ const AdminDashboard = () => {
                     Status Pesanan
                   </h3>
                   <p className="text-base font-extrabold text-gray-800">
-                    <span className="text-emerald-600">✅ {summary.total_sukses}</span> / <span className="text-amber-600">⌛ {summary.total_pending}</span>
+                    <span className="text-emerald-600">
+                      ✅ {summary.total_sukses}
+                    </span>{" "}
+                    /{" "}
+                    <span className="text-amber-600">
+                      ⌛ {summary.total_pending}
+                    </span>
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
@@ -492,10 +509,19 @@ const AdminDashboard = () => {
                 </h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={summaryHarian}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
                     <XAxis dataKey="tanggal" stroke="#94a3b8" fontSize={12} />
                     <YAxis stroke="#94a3b8" fontSize={12} />
-                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #fed7aa" }} />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #fed7aa",
+                      }}
+                    />
                     <Legend />
                     <Bar
                       dataKey="total"
@@ -519,10 +545,30 @@ const AdminDashboard = () => {
                     layout="vertical"
                     margin={{ left: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                    <XAxis type="number" allowDecimals={false} stroke="#94a3b8" fontSize={12} />
-                    <YAxis dataKey="nama" type="category" width={110} stroke="#94a3b8" fontSize={12} />
-                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #fed7aa" }} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      horizontal={false}
+                      stroke="#f1f5f9"
+                    />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      stroke="#94a3b8"
+                      fontSize={12}
+                    />
+                    <YAxis
+                      dataKey="nama"
+                      type="category"
+                      width={110}
+                      stroke="#94a3b8"
+                      fontSize={12}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #fed7aa",
+                      }}
+                    />
                     <Legend />
                     <Bar
                       dataKey="total_terjual"
@@ -599,12 +645,18 @@ const AdminDashboard = () => {
                           key={menu.id}
                           className="hover:bg-orange-50/40 transition"
                         >
-                          <td className="px-4 py-3 text-center text-xs text-gray-400">{index + 1}</td>
-                          <td className="px-4 py-3 font-semibold text-gray-900">{menu.nama}</td>
+                          <td className="px-4 py-3 text-center text-xs text-gray-400">
+                            {index + 1}
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-gray-900">
+                            {menu.nama}
+                          </td>
                           <td className="px-4 py-3 font-bold text-orange-600">
                             Rp {parseInt(menu.harga).toLocaleString("id-ID")}
                           </td>
-                          <td className="px-4 py-3 text-xs text-gray-500 max-w-xs truncate">{menu.deskripsi || "-"}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500 max-w-xs truncate">
+                            {menu.deskripsi || "-"}
+                          </td>
                           <td className="px-4 py-3 text-center">
                             <img
                               src={`http://localhost:8000/image/${menu.gambar}`}
@@ -612,7 +664,8 @@ const AdminDashboard = () => {
                               className="w-12 h-12 object-cover rounded-xl mx-auto border border-gray-200"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80";
+                                e.target.src =
+                                  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80";
                               }}
                             />
                           </td>
@@ -674,10 +727,19 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {dataPesanan.map((order, index) => (
-                      <tr key={order.id} className="hover:bg-orange-50/40 transition">
-                        <td className="px-4 py-3.5 text-center text-xs text-gray-400">{index + 1}</td>
-                        <td className="px-4 py-3.5 font-bold text-gray-800">{order.nama_pelanggan || "Pelanggan"}</td>
-                        <td className="px-4 py-3.5 text-xs font-mono text-gray-600">#{order.id}</td>
+                      <tr
+                        key={order.id}
+                        className="hover:bg-orange-50/40 transition"
+                      >
+                        <td className="px-4 py-3.5 text-center text-xs text-gray-400">
+                          {index + 1}
+                        </td>
+                        <td className="px-4 py-3.5 font-bold text-gray-800">
+                          {order.nama_pelanggan || "Pelanggan"}
+                        </td>
+                        <td className="px-4 py-3.5 text-xs font-mono text-gray-600">
+                          #{order.id}
+                        </td>
                         <td className="px-4 py-3.5 font-extrabold text-orange-600">
                           Rp {order.total.toLocaleString("id-ID")}
                         </td>
@@ -736,7 +798,9 @@ const AdminDashboard = () => {
 
             <form onSubmit={handleTambahMenu} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Nama Menu</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Nama Menu
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: Rendang Daging Sapi"
@@ -748,7 +812,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Harga (Rp)</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Harga (Rp)
+                </label>
                 <input
                   type="number"
                   placeholder="Contoh: 28000"
@@ -760,7 +826,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Deskripsi Menu</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Deskripsi Menu
+                </label>
                 <textarea
                   rows="2"
                   placeholder="Deskripsi singkat rasa dan bahan hidangan..."
@@ -773,7 +841,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Kategori</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Kategori
+                </label>
                 <select
                   value={form.category_id}
                   onChange={(e) =>
@@ -792,7 +862,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Foto Menu</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Foto Menu
+                </label>
                 <input
                   type="file"
                   accept="image/*"
@@ -842,7 +914,9 @@ const AdminDashboard = () => {
 
             <form onSubmit={handleSubmitEdit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Nama Menu</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Nama Menu
+                </label>
                 <input
                   type="text"
                   value={editForm.nama}
@@ -855,7 +929,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Harga (Rp)</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Harga (Rp)
+                </label>
                 <input
                   type="number"
                   value={editForm.harga}
@@ -868,7 +944,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Deskripsi Menu</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Deskripsi Menu
+                </label>
                 <textarea
                   rows="2"
                   value={editForm.deskripsi}
@@ -880,7 +958,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Kategori</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Kategori
+                </label>
                 <select
                   value={editForm.category_id}
                   onChange={(e) =>
@@ -899,7 +979,9 @@ const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Foto Baru (Opsional)</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Foto Baru (Opsional)
+                </label>
                 <input
                   type="file"
                   accept="image/*"
@@ -1012,4 +1094,3 @@ const AdminDashboard = () => {
   );
 };
 export default AdminDashboard;
-

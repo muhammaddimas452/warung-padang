@@ -6,12 +6,14 @@ import { Link } from "react-router-dom";
 import useAuth from "../context/useAuth";
 import { useCart } from "../context/cartContext";
 import CartDrawer from "./cartDrawer";
+import ProfileModal from "./profileModal";
 import {
   FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
   FaHistory,
   FaUserShield,
+  FaUserEdit,
 } from "react-icons/fa";
 
 const Nav = ({ onSearch }) => {
@@ -21,9 +23,12 @@ const Nav = ({ onSearch }) => {
   const { user, logout, openAuthModal } = useAuth();
   const { cart } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const dropdownRef = useRef(null);
 
-  const cartCount = cart ? cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  const cartCount = cart
+    ? cart.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -41,25 +46,31 @@ const Nav = ({ onSearch }) => {
       <div className="flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Logo Rumah Makan Padang" className="h-[60px] w-auto object-contain" />
+          <img
+            src={logo}
+            alt="Logo Rumah Makan Padang"
+            className="h-[60px] w-auto object-contain"
+          />
         </Link>
 
         {/* Mobile Toggle */}
         <div className="flex items-center gap-3 md:hidden">
-          {/* Quick Cart on Mobile */}
-          <div className="relative">
-            <img
-              src={cartImg}
-              className="h-10 w-10 cursor-pointer rounded-full border border-orange-300 hover:border-orange-400"
-              alt="Keranjang"
-              onClick={() => setShowCart(true)}
-            />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
-                {cartCount}
-              </span>
-            )}
-          </div>
+          {/* Quick Cart on Mobile - Disembunyikan dari Admin */}
+          {(!user || user.role !== "admin") && (
+            <div className="relative">
+              <img
+                src={cartImg}
+                className="h-10 w-10 cursor-pointer rounded-full border border-orange-300 hover:border-orange-400"
+                alt="Keranjang"
+                onClick={() => setShowCart(true)}
+              />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+          )}
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -74,9 +85,19 @@ const Nav = ({ onSearch }) => {
               stroke="currentColor"
             >
               {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
@@ -97,7 +118,12 @@ const Nav = ({ onSearch }) => {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
         </div>
@@ -131,7 +157,11 @@ const Nav = ({ onSearch }) => {
               onClick={() => setOpen(!open)}
             >
               <img
-                src={profile}
+                src={
+                  user?.avatar
+                    ? `http://localhost:8000/storage/avatars/${user.avatar}`
+                    : profile
+                }
                 alt="Profile"
                 className="h-[46px] w-[46px] rounded-full border-2 border-orange-300 hover:border-orange-500 object-cover transition"
               />
@@ -147,8 +177,12 @@ const Nav = ({ onSearch }) => {
                 {!user ? (
                   <>
                     <div className="px-4 py-3 bg-orange-50/60 border-b border-orange-100">
-                      <p className="text-xs font-semibold text-gray-700">Akun Pelanggan</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">Masuk untuk memesan lebih cepat</p>
+                      <p className="text-xs font-semibold text-gray-700">
+                        Akun Pelanggan
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">
+                        Masuk untuk memesan lebih cepat
+                      </p>
                     </div>
                     <button
                       onClick={() => {
@@ -175,7 +209,9 @@ const Nav = ({ onSearch }) => {
                   <>
                     <div className="px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
                       <p className="text-xs text-gray-500">Masuk sebagai</p>
-                      <p className="font-bold text-gray-800 truncate">{user.name}</p>
+                      <p className="font-bold text-gray-800 truncate">
+                        {user.name}
+                      </p>
                       <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-orange-100 text-orange-700">
                         {user.role === "admin" ? "Admin Resto" : "Pelanggan"}
                       </span>
@@ -191,6 +227,17 @@ const Nav = ({ onSearch }) => {
                         Dashboard Admin
                       </Link>
                     )}
+
+                    <button
+                      onClick={() => {
+                        setOpen(false); // Tutup dropdown
+                        setShowProfileModal(true); // Buka modal
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-orange-50 text-gray-700 hover:text-orange-600 flex items-center gap-2.5 transition cursor-pointer font-medium"
+                    >
+                      <FaUserEdit className="text-orange-500 text-sm" />
+                      Profil Saya
+                    </button>
 
                     <Link
                       to="/my-orders"
@@ -219,25 +266,27 @@ const Nav = ({ onSearch }) => {
             )}
           </div>
 
-          {/* Cart Icon */}
-          <div className="relative">
-            <button
-              onClick={() => setShowCart(true)}
-              aria-label="Buka keranjang"
-              className="relative p-1 rounded-full hover:bg-orange-50 transition cursor-pointer"
-            >
-              <img
-                src={cartImg}
-                className="h-[46px] w-[46px] rounded-full border-2 border-orange-300 hover:border-orange-500 transition object-cover"
-                alt="Keranjang"
-              />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </div>
+          {/* Cart Icon - Desktop - Disembunyikan dari Admin */}
+          {(!user || user.role !== "admin") && (
+            <div className="relative">
+              <button
+                onClick={() => setShowCart(true)}
+                aria-label="Buka keranjang"
+                className="relative p-1 rounded-full hover:bg-orange-50 transition cursor-pointer"
+              >
+                <img
+                  src={cartImg}
+                  className="h-[46px] w-[46px] rounded-full border-2 border-orange-300 hover:border-orange-500 transition object-cover"
+                  alt="Keranjang"
+                />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -281,9 +330,13 @@ const Nav = ({ onSearch }) => {
             <div className="bg-orange-50/70 p-3 rounded-2xl border border-orange-100 space-y-2">
               <div className="flex items-center gap-2">
                 <img
-                  src={profile}
+                  src={
+                    user?.avatar
+                      ? `http://localhost:8000/storage/avatars/${user.avatar}`
+                      : profile
+                  }
                   alt="Profile"
-                  className="h-10 w-10 rounded-full border border-orange-300 object-cover"
+                  className="h-[46px] w-[46px] rounded-full border-2 border-orange-300 hover:border-orange-500 object-cover transition"
                 />
                 <div>
                   <p className="text-sm font-bold text-gray-800">{user.name}</p>
@@ -304,6 +357,18 @@ const Nav = ({ onSearch }) => {
                     Dashboard Admin
                   </Link>
                 )}
+
+                {/* 👈 TOMBOL PROFIL MOBILE */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false); // Tutup menu HP
+                    setShowProfileModal(true); // Buka modal
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-white transition text-left cursor-pointer"
+                >
+                  <FaUserEdit className="text-orange-500" />
+                  Profil Saya
+                </button>
 
                 <Link
                   to="/my-orders"
@@ -328,6 +393,10 @@ const Nav = ({ onSearch }) => {
             </div>
           )}
         </div>
+      )}
+      {/* 👈 RENDER MODAL PROFIL DISINI */}
+      {showProfileModal && (
+        <ProfileModal onClose={() => setShowProfileModal(false)} />
       )}
     </nav>
   );
